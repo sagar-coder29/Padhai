@@ -2,8 +2,6 @@
 
 > An AI-powered study assistant that helps you learn from PDF documents using local LLM ✨
 
-![Padhai Screenshot](screenshot.png)
-
 ## 🚀 Features
 
 - 📄 **PDF Upload** - Upload any PDF document for study
