@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 OLLAMA_CONFIG = {
     "model": "gemma4:e4b",
     "baseUrl": "http://localhost:11434/v1",
-    "apiKey": "ollama"
+    "apiKey": "ollama",
 }
 
 
@@ -24,7 +24,7 @@ def extract_text_from_pdf(pdf_file):
                 if page_text:
                     text += page_text + "\n"
                 else:
-                    text += f"[Page {i+1} - no text extracted]\n"
+                    text += f"[Page {i + 1} - no text extracted]\n"
     except Exception as e:
         pass
 
@@ -41,33 +41,77 @@ def extract_text_from_pdf(pdf_file):
     return text.strip() if text else "No readable text found in PDF"
 
 
-def ask_gemma(question, context):
+def ask_gemma(question, context, hinglish=False):
     max_context = 3000
     if len(context) > max_context:
         context = context[:max_context] + "..."
+
+    if hinglish:
+        system_prompt = "You are a helpful study assistant. Answer questions based only on the provided study material. IMPORTANT: Respond in Hinglish (mix of Hindi and English) to make it easy for Indian students."
+    else:
+        system_prompt = "You are a helpful study assistant. Answer questions based only on the provided study material."
 
     try:
         response = requests.post(
             f"{OLLAMA_CONFIG['baseUrl']}/chat/completions",
             headers={
                 "Authorization": f"Bearer {OLLAMA_CONFIG['apiKey']}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
             json={
                 "model": OLLAMA_CONFIG["model"],
                 "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are a helpful study assistant. Answer questions based only on the provided study material."
-                    },
+                    {"role": "system", "content": system_prompt},
                     {
                         "role": "user",
-                        "content": f"Study Material:\n{context}\n\nQuestion: {question}"
-                    }
+                        "content": f"Study Material:\n{context}\n\nQuestion: {question}",
+                    },
                 ],
-                "stream": False
+                "stream": False,
             },
             timeout=60,
+        )
+        result = response.json()
+        return result["choices"][0]["message"]["content"]
+    except Exception as e:
+        return f"Error connecting to Ollama: {str(e)}. Make sure Ollama is running with: ollama serve"
+
+
+def generate_quiz(context):
+    max_context = 3000
+    if len(context) > max_context:
+        context = context[:max_context] + "..."
+
+    system_prompt = """You are a quiz generator. Based on the provided study material, generate exactly 5 multiple choice questions.
+    Format each question like this:
+    Q1. [question text]
+    A) [option 1]
+    B) [option 2]
+    C) [option 3]
+    D) [option 4]
+    Answer: [correct letter]
+    
+    Make sure questions are educational and cover different parts of the material."""
+
+    try:
+        response = requests.post(
+            f"{OLLAMA_CONFIG['baseUrl']}/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OLLAMA_CONFIG['apiKey']}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": OLLAMA_CONFIG["model"],
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {
+                        "role": "user",
+                        "content": f"Study Material:\n{context}\n\nGenerate 5 quiz questions:",
+                    },
+                ],
+                "stream": False,
+            },
+            timeout=120,
         )
         result = response.json()
         return result["choices"][0]["message"]["content"]
@@ -85,11 +129,13 @@ def upload_pdf(request):
         pdf_file = request.FILES["pdf"]
         context = extract_text_from_pdf(pdf_file)
         request.session["pdf_context"] = context
-        return JsonResponse({
-            "success": True, 
-            "text_length": len(context),
-            "preview": context[:500] if len(context) > 500 else context
-        })
+        return JsonResponse(
+            {
+                "success": True,
+                "text_length": len(context),
+                "preview": context[:500] if len(context) > 500 else context,
+            }
+        )
     return JsonResponse({"success": False, "error": "No PDF provided"})
 
 
@@ -98,14 +144,39 @@ def ask_question(request):
     if request.method == "POST":
         question = request.POST.get("question", "")
         context = request.session.get("pdf_context", "")
+        hinglish = request.POST.get("hinglish", "false").lower() == "true"
 
         if not context or context == "No readable text found in PDF":
-            return JsonResponse({"success": False, "error": "Please upload a PDF with text (not scanned images)"})
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Please upload a PDF with text (not scanned images)",
+                }
+            )
 
         if not question:
             return JsonResponse({"success": False, "error": "Please enter a question"})
 
-        answer = ask_gemma(question, context)
+        answer = ask_gemma(question, context, hinglish)
         return JsonResponse({"success": True, "answer": answer})
+
+    return JsonResponse({"success": False, "error": "Invalid request"})
+
+
+@csrf_exempt
+def generate_quiz_view(request):
+    if request.method == "POST":
+        context = request.session.get("pdf_context", "")
+
+        if not context or context == "No readable text found in PDF":
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": "Please upload a PDF with text (not scanned images)",
+                }
+            )
+
+        quiz = generate_quiz(context)
+        return JsonResponse({"success": True, "quiz": quiz})
 
     return JsonResponse({"success": False, "error": "Invalid request"})

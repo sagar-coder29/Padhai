@@ -71,13 +71,30 @@
             <div class="relative">
                 <textarea id="questionInput" rows="3" placeholder="What would you like to know about your study material?" 
                     class="w-full bg-slate-900/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"></textarea>
-                <button id="askBtn" disabled
-                    class="mt-4 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    Ask AI
-                </button>
+                
+                <div class="flex items-center gap-4 mt-4 mb-4">
+                    <label class="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white transition-colors">
+                        <input type="checkbox" id="hinglishToggle" class="w-5 h-5 rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0">
+                        <span class="text-sm font-medium">🇮🇳 Hinglish Mode</span>
+                    </label>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button id="askBtn" disabled
+                        class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Ask AI
+                    </button>
+                    <button id="quizBtn" disabled
+                        class="flex-1 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                        Auto Quiz Generator
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -112,6 +129,7 @@
         const errorMessage = document.getElementById('errorMessage');
 
         let pdfUploaded = false;
+        let quizMode = false;
 
         dropZone.addEventListener('click', () => pdfInput.click());
         
@@ -145,6 +163,7 @@
             uploadPrompt.classList.remove('hidden');
             uploadedFile.classList.add('hidden');
             askBtn.disabled = true;
+            document.getElementById('quizBtn').disabled = true;
             pdfInput.value = '';
         });
 
@@ -169,6 +188,7 @@
                     document.getElementById('fileName').textContent = file.name;
                     document.getElementById('textLength').textContent = data.text_length.toLocaleString();
                     askBtn.disabled = false;
+                    document.getElementById('quizBtn').disabled = false;
                 } else {
                     showError(data.error || 'Failed to upload PDF');
                 }
@@ -178,6 +198,7 @@
         }
 
         askBtn.addEventListener('click', askQuestion);
+        document.getElementById('quizBtn').addEventListener('click', generateQuiz);
         questionInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -194,11 +215,13 @@
             answerContent.classList.add('hidden');
             errorMessage.classList.add('hidden');
             askBtn.disabled = true;
+            document.getElementById('quizBtn').disabled = true;
             askBtn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...';
 
             try {
                 const formData = new FormData();
                 formData.append('question', question);
+                formData.append('hinglish', document.getElementById('hinglishToggle').checked);
 
                 const response = await fetch('/ask/', {
                     method: 'POST',
@@ -222,7 +245,47 @@
                 showError('Error: ' + error.message);
             } finally {
                 askBtn.disabled = false;
+                document.getElementById('quizBtn').disabled = false;
                 askBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Ask AI';
+            }
+        }
+
+        async function generateQuiz() {
+            answerSection.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            answerContent.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            askBtn.disabled = true;
+            document.getElementById('quizBtn').disabled = true;
+            document.getElementById('quizBtn').innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating Quiz...';
+
+            try {
+                const formData = new FormData();
+
+                const response = await fetch('/generate-quiz/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                const data = await response.json();
+
+                loadingState.classList.add('hidden');
+                answerContent.classList.remove('hidden');
+
+                if (data.success) {
+                    document.getElementById('answerText').textContent = data.quiz;
+                } else {
+                    showError(data.error || 'Failed to generate quiz');
+                }
+            } catch (error) {
+                loadingState.classList.add('hidden');
+                showError('Error: ' + error.message);
+            } finally {
+                askBtn.disabled = false;
+                document.getElementById('quizBtn').disabled = false;
+                document.getElementById('quizBtn').innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg> Auto Quiz Generator';
             }
         }
 
