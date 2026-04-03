@@ -13,6 +13,24 @@
 - 🧠 **Auto Quiz Generator** - Generate 5 MCQ questions from your PDF instantly!
 - 💻 **Local LLM** - Runs entirely on your machine using Ollama (no data leaves your computer!)
 
+## 📸 Screenshots
+
+### 1. Home Page - PDF Upload
+![Upload PDF](Screenshot%202026-04-03%20at%2011.01.44%20AM.png)
+*Upload your study material (PDF) to get started*
+
+### 2. AI Q&A Response
+![AI Response](Screenshot%202026-04-03%20at%2012.36.04%20PM.png)
+*Ask questions and get instant AI-powered answers*
+
+### 3. Quiz Generation
+![Quiz Generator](Screenshot%202026-04-03%20at%203.28.53%20PM.png)
+*Auto-generate 5 MCQ questions from your PDF*
+
+### 4. Hinglish Mode
+![Hinglish Mode](Screenshot%202026-04-03%20at%203.31.59%20PM.png)
+*Toggle Hinglish for Hindi-English mixed responses*
+
 ## 📋 Prerequisites
 
 - 🐍 Python 3.10+
