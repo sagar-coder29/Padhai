@@ -2,11 +2,15 @@
 
 > An AI-powered study assistant that helps you learn from PDF documents using local LLM ✨
 
+![Padhai Screenshot](screenshot.png)
+
 ## 🚀 Features
 
 - 📄 **PDF Upload** - Upload any PDF document for study
 - ✂️ **Text Extraction** - Automatically extracts text from PDF files
 - 🤖 **AI-Powered Q&A** - Ask questions about your study material and get instant answers
+- 🇮🇳 **Hinglish Mode** - Toggle to get responses in Hindi-English mix
+- 🧠 **Auto Quiz Generator** - Generate 5 MCQ questions from your PDF instantly!
 - 💻 **Local LLM** - Runs entirely on your machine using Ollama (no data leaves your computer!)
 
 ## 📋 Prerequisites
