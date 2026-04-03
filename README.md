@@ -16,19 +16,19 @@
 ## 📸 Screenshots
 
 ### 1. Home Page - PDF Upload
-![Upload PDF](Screenshot%202026-04-03%20at%2011.01.44%20AM.png)
+![Upload PDF](Screenshot-2026-04-03-at-11.01.44-AM.png)
 *Upload your study material (PDF) to get started*
 
 ### 2. AI Q&A Response
-![AI Response](Screenshot%202026-04-03%20at%2012.36.04%20PM.png)
+![AI Response](Screenshot-2026-04-03-at-12.36.04-PM.png)
 *Ask questions and get instant AI-powered answers*
 
 ### 3. Quiz Generation
-![Quiz Generator](Screenshot%202026-04-03%20at%203.28.53%20PM.png)
+![Quiz Generator](Screenshot-2026-04-03-at-3.28.53-PM.png)
 *Auto-generate 5 MCQ questions from your PDF*
 
 ### 4. Hinglish Mode
-![Hinglish Mode](Screenshot%202026-04-03%20at%203.31.59%20PM.png)
+![Hinglish Mode](Screenshot-2026-04-03-at-3.31.59-PM.png)
 *Toggle Hinglish for Hindi-English mixed responses*
 
 ## 📋 Prerequisites
