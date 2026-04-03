@@ -1,25 +1,27 @@
-# Padhai
+# 📚 Padhai
 
-An AI-powered study assistant that helps you learn from PDF documents using local LLM.
+> An AI-powered study assistant that helps you learn from PDF documents using local LLM ✨
 
-## Features
+![Padhai Screenshot](screenshot.png)
 
-- **PDF Upload**: Upload any PDF document for study
-- **Text Extraction**: Automatically extracts text from PDF files
-- **AI-Powered Q&A**: Ask questions about your study material and get instant answers
-- **Local LLM**: Runs entirely on your machine using Ollama
+## 🚀 Features
 
-## Prerequisites
+- 📄 **PDF Upload** - Upload any PDF document for study
+- ✂️ **Text Extraction** - Automatically extracts text from PDF files
+- 🤖 **AI-Powered Q&A** - Ask questions about your study material and get instant answers
+- 💻 **Local LLM** - Runs entirely on your machine using Ollama (no data leaves your computer!)
 
-- Python 3.10+
-- [Ollama](https://ollama.ai/) installed and running
+## 📋 Prerequisites
 
-## Setup
+- 🐍 Python 3.10+
+- 🦙 [Ollama](https://ollama.ai/) installed and running
+
+## 🛠️ Setup
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
-cd padhai
+git clone https://github.com/sagar-coder29/Padhai.git
+cd Padhai
 ```
 
 2. **Create a virtual environment**
@@ -52,23 +54,25 @@ python manage.py runserver
 ```
 
 7. **Open in browser**
-Navigate to `http://localhost:8000`
+Navigate to `http://localhost:8000` 🎉
 
-## Usage
+## 📖 Usage
 
-1. Click "Choose File" to select a PDF document
-2. Click "Upload PDF" to process the document
+1. Click 📁 "Choose File" to select a PDF document
+2. Click ⬆️ "Upload PDF" to process the document
 3. Enter your question in the text field
-4. Click "Ask" to get an AI-generated answer based on the PDF content
+4. Click ❓ "Ask" to get an AI-generated answer based on the PDF content
 
-## Tech Stack
+## 💻 Tech Stack
 
-- **Backend**: Django 4.2+
-- **PDF Processing**: pdfplumber, PyPDF2
-- **AI Model**: Gemma via Ollama
-- **Frontend**: HTML, JavaScript (vanilla)
+| Technology | Purpose |
+|------------|---------|
+| 🐍 Django 4.2+ | Backend Framework |
+| 📄 pdfplumber, PyPDF2 | PDF Processing |
+| 🤖 Gemma via Ollama | AI Model |
+| 🌐 HTML/CSS/JS | Frontend |
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 padhai/
@@ -84,7 +88,7 @@ padhai/
 └── requirements.txt
 ```
 
-## API Endpoints
+## 🔗 API Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -92,6 +96,14 @@ padhai/
 | `/api/upload-pdf/` | POST | Upload and process PDF |
 | `/api/ask/` | POST | Ask a question about the PDF |
 
-## License
+## 🤝 Contributing
 
-MIT License
+Contributions are welcome! Feel free to open issues and pull requests.
+
+## 📝 License
+
+MIT License - feel free to use this project for your studies!
+
+---
+
+Made with ❤️ for students everywhere 📚🎓
