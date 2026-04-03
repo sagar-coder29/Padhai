@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Padhai - AI Study Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
+        }
+        .ai-glow { animation: pulse-glow 2s ease-in-out infinite; }
+        .typing-dot::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+                Padhai
+            </h1>
+            <p class="text-slate-400 text-lg">AI-powered PDF study assistant powered by Gemma</p>
+        </header>
+
+        <div class="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50 ai-glow mb-8">
+            <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Upload Study Material
+            </h2>
+            
+            <div class="border-2 border-dashed border-slate-600 rounded-xl p-8 text-center hover:border-indigo-500 transition-colors cursor-pointer" id="dropZone">
+                <input type="file" id="pdfInput" accept=".pdf" class="hidden">
+                <div id="uploadPrompt">
+                    <svg class="w-12 h-12 mx-auto text-slate-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                    </svg>
+                    <p class="text-slate-400 mb-2">Drag & drop your PDF here or click to browse</p>
+                    <p class="text-slate-500 text-sm">Maximum file size: 10MB</p>
+                </div>
+                <div id="uploadedFile" class="hidden">
+                    <svg class="w-12 h-12 mx-auto text-green-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p class="text-green-400 font-medium" id="fileName"></p>
+                    <p class="text-slate-400 text-sm mt-1"><span id="textLength"></span> characters extracted</p>
+                    <button id="clearPdf" class="mt-4 text-red-400 hover:text-red-300 text-sm underline">Remove PDF</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50 mb-8">
+            <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Ask Questions
+            </h2>
+            
+            <div class="relative">
+                <textarea id="questionInput" rows="3" placeholder="What would you like to know about your study material?" 
+                    class="w-full bg-slate-900/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"></textarea>
+                <button id="askBtn" disabled
+                    class="mt-4 w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:from-slate-600 disabled:to-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Ask AI
+                </button>
+            </div>
+        </div>
+
+        <div id="answerSection" class="bg-slate-800/50 backdrop-blur-lg rounded-2xl p-8 border border-slate-700/50 hidden">
+            <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <svg class="w-6 h-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                AI Response
+            </h2>
+            <div id="loadingState" class="hidden">
+                <p class="text-indigo-400 typing-dot">Analyzing your question</p>
+            </div>
+            <div id="answerContent" class="prose prose-invert prose-slate max-w-none">
+                <p class="text-slate-300 leading-relaxed whitespace-pre-wrap" id="answerText"></p>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="bg-red-900/30 border border-red-700/50 rounded-xl p-4 text-red-400 hidden"></div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const pdfInput = document.getElementById('pdfInput');
+        const uploadPrompt = document.getElementById('uploadPrompt');
+        const uploadedFile = document.getElementById('uploadedFile');
+        const questionInput = document.getElementById('questionInput');
+        const askBtn = document.getElementById('askBtn');
+        const answerSection = document.getElementById('answerSection');
+        const loadingState = document.getElementById('loadingState');
+        const answerContent = document.getElementById('answerContent');
+        const errorMessage = document.getElementById('errorMessage');
+
+        let pdfUploaded = false;
+
+        dropZone.addEventListener('click', () => pdfInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-indigo-500', 'bg-indigo-500/10');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-indigo-500', 'bg-indigo-500/10');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                handlePdfUpload(file);
+            }
+        });
+
+        pdfInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handlePdfUpload(e.target.files[0]);
+            }
+        });
+
+        document.getElementById('clearPdf').addEventListener('click', (e) => {
+            e.stopPropagation();
+            pdfUploaded = false;
+            uploadPrompt.classList.remove('hidden');
+            uploadedFile.classList.add('hidden');
+            askBtn.disabled = true;
+            pdfInput.value = '';
+        });
+
+        async function handlePdfUpload(file) {
+            const formData = new FormData();
+            formData.append('pdf', file);
+
+            try {
+                const response = await fetch('/upload-pdf/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    pdfUploaded = true;
+                    uploadPrompt.classList.add('hidden');
+                    uploadedFile.classList.remove('hidden');
+                    document.getElementById('fileName').textContent = file.name;
+                    document.getElementById('textLength').textContent = data.text_length.toLocaleString();
+                    askBtn.disabled = false;
+                } else {
+                    showError(data.error || 'Failed to upload PDF');
+                }
+            } catch (error) {
+                showError('Error uploading PDF: ' + error.message);
+            }
+        }
+
+        askBtn.addEventListener('click', askQuestion);
+        questionInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askQuestion();
+            }
+        });
+
+        async function askQuestion() {
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            answerSection.classList.remove('hidden');
+            loadingState.classList.remove('hidden');
+            answerContent.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            askBtn.disabled = true;
+            askBtn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Thinking...';
+
+            try {
+                const formData = new FormData();
+                formData.append('question', question);
+
+                const response = await fetch('/ask/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                const data = await response.json();
+
+                loadingState.classList.add('hidden');
+                answerContent.classList.remove('hidden');
+
+                if (data.success) {
+                    document.getElementById('answerText').textContent = data.answer;
+                } else {
+                    showError(data.error || 'Failed to get answer');
+                }
+            } catch (error) {
+                loadingState.classList.add('hidden');
+                showError('Error: ' + error.message);
+            } finally {
+                askBtn.disabled = false;
+                askBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Ask AI';
+            }
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
